@@ -10,18 +10,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Tous les champs sont requis";
     } else {
         try {
-            $stmt = $conn->prepare("SELECT id_utilisateur, mot_de_passe, autres_informations FROM Utilisateurs WHERE email = ?");
+            $stmt = $conn->prepare("SELECT id_utilisateur, mot_de_passe, role, autres_informations FROM Utilisateurs WHERE email = ?");
             $stmt->execute([$email]);
             
-            if ($user = $stmt->fetch()) {
+            if ($user = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 if (password_verify($mot_de_passe, $user['mot_de_passe'])) {
                     $_SESSION['user_id'] = $user['id_utilisateur'];
-                    $autres_informations = json_decode($user['autres_informations'], true);
-                    $role = isset($autres_informations['role']) ? $autres_informations['role'] : 'user';
-                    $_SESSION['role'] = $role;
+                    
+                    // Get role from database
+                    $_SESSION['role'] = (int)$user['role'];
+
+                    // If role column is not set, try to get from autres_informations
+                    if ($_SESSION['role'] === 0 && isset($user['autres_informations'])) {
+                        $autres_informations = json_decode($user['autres_informations'], true);
+                        if (isset($autres_informations['role']) && $autres_informations['role'] === 'admin') {
+                            $_SESSION['role'] = 1;
+                            // Update the role column
+                            $update = $conn->prepare("UPDATE Utilisateurs SET role = 1 WHERE id_utilisateur = ?");
+                            $update->execute([$user['id_utilisateur']]);
+                        }
+                    }
 
                     // Redirect based on role
-                    if ($role === 'admin') {
+                    if ($_SESSION['role'] === 1) {
                         header("Location: admin_dashboard.php");
                     } else {
                         header("Location: profile.php");

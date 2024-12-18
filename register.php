@@ -6,7 +6,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nom_utilisateur = trim($_POST['nom_utilisateur']);
     $email = trim($_POST['email']);
     $mot_de_passe = trim($_POST['mot_de_passe']);
-    $role = 'user'; // Set default role to user
 
     // Validate input
     if (empty($nom_utilisateur) || empty($email) || empty($mot_de_passe)) {
@@ -23,8 +22,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $hashed_password = password_hash($mot_de_passe, PASSWORD_DEFAULT);
             
             try {
-                $stmt = $conn->prepare("INSERT INTO Utilisateurs (nom_utilisateur, email, mot_de_passe, autres_informations) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$nom_utilisateur, $email, $hashed_password, json_encode(['role' => $role])]);
+                // Store role in both columns for compatibility
+                $autres_informations = json_encode(['role' => 'user']);
+                $stmt = $conn->prepare("INSERT INTO Utilisateurs (nom_utilisateur, email, mot_de_passe, role, autres_informations) VALUES (?, ?, ?, 0, ?)");
+                $stmt->execute([$nom_utilisateur, $email, $hashed_password, $autres_informations]);
                 
                 $_SESSION['success'] = "Compte créé avec succès! Vous pouvez maintenant vous connecter.";
                 header("Location: login.php");
