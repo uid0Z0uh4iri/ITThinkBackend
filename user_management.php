@@ -115,6 +115,9 @@ try {
             <a href="subcategory_management.php" class="sidebar-link">
                 <i class='bx bx-list-ul me-2'></i> Gestion Sous-catégories
             </a>
+            <a href="feedback_management.php" class="sidebar-link">
+                <i class='bx bx-message-square-dots me-2'></i> Gestion Témoignages
+            </a>
         </nav>
     </div>
 

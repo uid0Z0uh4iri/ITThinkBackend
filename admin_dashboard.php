@@ -10,49 +10,26 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 1) {
 
 // Fetch statistics
 try {
-    // Total Users
-    $stmt = $conn->query("SELECT COUNT(*) as total FROM Utilisateurs");
-    $totalUsers = $stmt->fetch()['total'];
+    // User statistics
+    $stmt = $conn->query("SELECT COUNT(*) as total_users FROM utilisateurs");
+    $userStats = $stmt->fetch();
+    $stmt = $conn->query("SELECT COUNT(*) as total_admins FROM utilisateurs WHERE role = 1");
+    $adminStats = $stmt->fetch();
 
-    // Total Projects
-    $stmt = $conn->query("SELECT COUNT(*) as total FROM Projets");
-    $totalProjects = $stmt->fetch()['total'];
+    // Category statistics
+    $stmt = $conn->query("SELECT COUNT(*) as total_categories FROM categories");
+    $categoryStats = $stmt->fetch();
+    $stmt = $conn->query("SELECT COUNT(*) as total_subcategories FROM souscategories");
+    $subcategoryStats = $stmt->fetch();
 
-    // Total Freelances
-    $stmt = $conn->query("SELECT COUNT(*) as total FROM Freelances");
-    $totalFreelances = $stmt->fetch()['total'];
-
-    // Total Categories
-    $stmt = $conn->query("SELECT COUNT(*) as total FROM Categories");
-    $totalCategories = $stmt->fetch()['total'];
-
-    // Total Offers
-    $stmt = $conn->query("SELECT COUNT(*) as total FROM Offres");
-    $totalOffers = $stmt->fetch()['total'];
-
-    // Total Testimonials
-    $stmt = $conn->query("SELECT COUNT(*) as total FROM Temoignages");
-    $totalTestimonials = $stmt->fetch()['total'];
-
-    // Recent Projects
-    $stmt = $conn->query("SELECT p.titre_projet, u.nom_utilisateur, p.date_creation 
-                         FROM Projets p 
-                         JOIN Utilisateurs u ON p.id_utilisateur = u.id_utilisateur 
-                         ORDER BY p.date_creation DESC LIMIT 5");
-    $recentProjects = $stmt->fetchAll();
-
-    // Recent Freelancers
-    $stmt = $conn->query("SELECT f.nom_freelance, u.email 
-                         FROM Freelances f 
-                         JOIN Utilisateurs u ON f.id_utilisateur = u.id_utilisateur 
-                         ORDER BY f.id_freelance DESC LIMIT 5");
-    $recentFreelancers = $stmt->fetchAll();
+    // Feedback statistics
+    $stmt = $conn->query("SELECT COUNT(*) as total_feedbacks FROM temoignages");
+    $feedbackStats = $stmt->fetch();
 
 } catch(PDOException $e) {
     die("Error: " . $e->getMessage());
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -62,11 +39,8 @@ try {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet">
     <style>
-        :root {
-            --sidebar-width: 250px;
-        }
         .sidebar {
-            width: var(--sidebar-width);
+            width: 250px;
             height: 100vh;
             position: fixed;
             left: 0;
@@ -76,7 +50,7 @@ try {
             color: white;
         }
         .main-content {
-            margin-left: var(--sidebar-width);
+            margin-left: 250px;
             padding: 20px;
         }
         .sidebar-link {
@@ -93,20 +67,19 @@ try {
         .sidebar-link.active {
             background-color: #3498db;
         }
+        .navbar {
+            margin-left: 250px;
+        }
         .stat-card {
-            border-radius: 15px;
+            border-radius: 10px;
             transition: transform 0.3s;
-            border: none;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .stat-card:hover {
             transform: translateY(-5px);
         }
         .stat-icon {
             font-size: 2.5rem;
-        }
-        .navbar {
-            margin-left: var(--sidebar-width);
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -122,6 +95,15 @@ try {
             </a>
             <a href="user_management.php" class="sidebar-link">
                 <i class='bx bx-user me-2'></i> Gestion Utilisateurs
+            </a>
+            <a href="category_management.php" class="sidebar-link">
+                <i class='bx bx-category me-2'></i> Gestion Catégories
+            </a>
+            <a href="subcategory_management.php" class="sidebar-link">
+                <i class='bx bx-list-ul me-2'></i> Gestion Sous-catégories
+            </a>
+            <a href="feedback_management.php" class="sidebar-link">
+                <i class='bx bx-message-square-dots me-2'></i> Gestion Témoignages
             </a>
         </nav>
     </div>
@@ -140,153 +122,115 @@ try {
     <!-- Main Content -->
     <div class="main-content">
         <div class="container-fluid">
-            <h1 class="mb-4">Tableau de Bord</h1>
-            
-            <!-- Statistics Cards -->
-            <div class="row g-4 mb-4">
-                <div class="col-md-4">
+            <h1 class="mb-4">Tableau de bord</h1>
+
+            <div class="row g-4">
+                <!-- Users Stats -->
+                <div class="col-md-6 col-lg-3">
                     <div class="card stat-card bg-primary text-white">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="card-title">Utilisateurs</h6>
-                                    <h2 class="mb-0"><?php echo $totalUsers; ?></h2>
+                                    <h6 class="card-title">Total Utilisateurs</h6>
+                                    <h2 class="mb-0"><?php echo $userStats['total_users']; ?></h2>
                                 </div>
-                                <i class='bx bx-user stat-icon'></i>
+                                <div class="stat-icon">
+                                    <i class='bx bx-user'></i>
+                                </div>
                             </div>
+                            <small>Dont <?php echo $adminStats['total_admins']; ?> administrateurs</small>
+                        </div>
+                        <div class="card-footer bg-primary border-0">
+                            <a href="user_management.php" class="text-white text-decoration-none">
+                                Gérer les utilisateurs <i class='bx bx-right-arrow-alt'></i>
+                            </a>
                         </div>
                     </div>
                 </div>
-                
-                <div class="col-md-4">
+
+                <!-- Categories Stats -->
+                <div class="col-md-6 col-lg-3">
                     <div class="card stat-card bg-success text-white">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="card-title">Projets</h6>
-                                    <h2 class="mb-0"><?php echo $totalProjects; ?></h2>
+                                    <h6 class="card-title">Total Catégories</h6>
+                                    <h2 class="mb-0"><?php echo $categoryStats['total_categories']; ?></h2>
                                 </div>
-                                <i class='bx bx-folder stat-icon'></i>
+                                <div class="stat-icon">
+                                    <i class='bx bx-category'></i>
+                                </div>
                             </div>
+                            <small>Et <?php echo $subcategoryStats['total_subcategories']; ?> sous-catégories</small>
+                        </div>
+                        <div class="card-footer bg-success border-0">
+                            <a href="category_management.php" class="text-white text-decoration-none">
+                                Gérer les catégories <i class='bx bx-right-arrow-alt'></i>
+                            </a>
                         </div>
                     </div>
                 </div>
-                
-                <div class="col-md-4">
+
+                <!-- Feedbacks Stats -->
+                <div class="col-md-6 col-lg-3">
                     <div class="card stat-card bg-info text-white">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="card-title">Freelances</h6>
-                                    <h2 class="mb-0"><?php echo $totalFreelances; ?></h2>
+                                    <h6 class="card-title">Total Témoignages</h6>
+                                    <h2 class="mb-0"><?php echo $feedbackStats['total_feedbacks']; ?></h2>
                                 </div>
-                                <i class='bx bx-briefcase stat-icon'></i>
+                                <div class="stat-icon">
+                                    <i class='bx bx-message-square-dots'></i>
+                                </div>
                             </div>
+                            <small>Avis des utilisateurs</small>
                         </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="card stat-card bg-warning text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="card-title">Catégories</h6>
-                                    <h2 class="mb-0"><?php echo $totalCategories; ?></h2>
-                                </div>
-                                <i class='bx bx-category stat-icon'></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="card stat-card bg-danger text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="card-title">Offres</h6>
-                                    <h2 class="mb-0"><?php echo $totalOffers; ?></h2>
-                                </div>
-                                <i class='bx bx-money stat-icon'></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="card stat-card bg-secondary text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="card-title">Témoignages</h6>
-                                    <h2 class="mb-0"><?php echo $totalTestimonials; ?></h2>
-                                </div>
-                                <i class='bx bx-message-square-dots stat-icon'></i>
-                            </div>
+                        <div class="card-footer bg-info border-0">
+                            <a href="feedback_management.php" class="text-white text-decoration-none">
+                                Gérer les témoignages <i class='bx bx-right-arrow-alt'></i>
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Recent Activity -->
-            <div class="row">
-                <!-- Recent Projects -->
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Projets Récents</h5>
+            <!-- Quick Actions -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <h2 class="mb-4">Actions rapides</h2>
+                    <div class="row g-4">
+                        <div class="col-md-6 col-lg-3">
+                            <a href="add_admin.php" class="card text-decoration-none">
+                                <div class="card-body text-center">
+                                    <i class='bx bx-user-plus fs-1 text-primary'></i>
+                                    <h5 class="mt-3 text-dark">Ajouter un utilisateur</h5>
+                                </div>
+                            </a>
                         </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Titre</th>
-                                            <th>Créateur</th>
-                                            <th>Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach($recentProjects as $project): ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($project['titre_projet']); ?></td>
-                                            <td><?php echo htmlspecialchars($project['nom_utilisateur']); ?></td>
-                                            <td><?php echo date('d/m/Y', strtotime($project['date_creation'])); ?></td>
-                                        </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="col-md-6 col-lg-3">
+                            <a href="category_management.php" class="card text-decoration-none">
+                                <div class="card-body text-center">
+                                    <i class='bx bx-plus-circle fs-1 text-success'></i>
+                                    <h5 class="mt-3 text-dark">Nouvelle catégorie</h5>
+                                </div>
+                            </a>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Recent Freelancers -->
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Freelances Récents</h5>
+                        <div class="col-md-6 col-lg-3">
+                            <a href="subcategory_management.php" class="card text-decoration-none">
+                                <div class="card-body text-center">
+                                    <i class='bx bx-list-plus fs-1 text-warning'></i>
+                                    <h5 class="mt-3 text-dark">Nouvelle sous-catégorie</h5>
+                                </div>
+                            </a>
                         </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Nom</th>
-                                            <th>Email</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach($recentFreelancers as $freelancer): ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($freelancer['nom_freelance']); ?></td>
-                                            <td><?php echo htmlspecialchars($freelancer['email']); ?></td>
-                                        </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="col-md-6 col-lg-3">
+                            <a href="feedback_management.php" class="card text-decoration-none">
+                                <div class="card-body text-center">
+                                    <i class='bx bx-message-square-detail fs-1 text-info'></i>
+                                    <h5 class="mt-3 text-dark">Voir les témoignages</h5>
+                                </div>
+                            </a>
                         </div>
                     </div>
                 </div>
