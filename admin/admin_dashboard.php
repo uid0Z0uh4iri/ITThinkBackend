@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config/database.php';
+require_once '../config/database.php';
 
 // Check if user is logged in and is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 1) {
@@ -112,7 +112,7 @@ try {
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="logout.php">
+                <a class="nav-link" href="../logout.php">
                     <i class='bx bx-log-out'></i> Déconnexion
                 </a>
             </div>
