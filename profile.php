@@ -59,14 +59,82 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - ITThink</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .navbar {
+            background-color: #2c3e50;
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            color: #fff !important;
+        }
+
+        .nav-item {
+            margin: 0 5px;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #fff !important;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link.active {
+            color: #fff !important;
+            background-color: #3498db;
+        }
+
+        .nav-link i {
+            margin-right: 5px;
+        }
+
+        @media (max-width: 991px) {
+            .nav-item {
+                margin: 5px 0;
+            }
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="#">ITThink</a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="logout.php">Déconnexion</a>
-                <button type="submit">Switch to Freelancer</button>
+            <a class="navbar-brand" href="home.php">
+                <strong>ITThink</strong>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'profile.php' ? 'active' : ''; ?>" href="profile.php">
+                            <i class="fas fa-plus-circle"></i> Add Project
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'mes_offres.php' ? 'active' : ''; ?>" href="mes_offres.php">
+                            <i class="fas fa-list"></i> View Offers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="switch_freelancer.php">
+                            <i class="fas fa-sync"></i> Switch to Freelancer
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="logout.php">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
@@ -143,5 +211,7 @@ try {
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
